@@ -3,114 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sahanara Online Service & Telecom - Online services, recharge, PVC card printing and customer support.">
+  <meta name="description" content="Sahanara Online Service & Telecom">
   <title>Sahanara Online Service & Telecom</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#home" aria-label="Sahanara Home">
-      <span class="brand-mark">S</span>
-      <span><strong>SAHANARA</strong><small>ONLINE SERVICE & TELECOM</small></span>
-    </a>
-    <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
-    <nav id="mainNav">
-      <a href="#home">Home</a>
-      <a href="#services">Services</a>
-      <a href="#rates">Rate List</a>
-      <a href="#about">About</a>
-      <a class="nav-cta" href="#contact">Contact</a>
-    </nav>
-  </header>
+<header class="topbar">
+  <a class="brand" href="#home"><span class="brand-mark">S</span><span><strong>SAHANARA</strong><small>ONLINE SERVICE & TELECOM</small></span></a>
+  <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+  <nav id="mainNav"><a href="#home">Home</a><a href="#services">Services</a><a href="#rates">Rate List</a><a href="#account">Customer Login</a><a class="nav-cta" href="#contact">Contact</a></nav>
+</header>
+<main>
+<section class="hero" id="home">
+  <div class="hero-content"><span class="eyebrow">YOUR TRUSTED DIGITAL SERVICE POINT</span>
+    <h1>সব ধরনের Online Service<br><em>এক জায়গায়</em></h1>
+    <p>অনলাইন ফর্ম, রিচার্জ, PVC Card Printing এবং বিভিন্ন ডিজিটাল পরিষেবার জন্য যোগাযোগ করুন।</p>
+    <div class="hero-actions"><a class="btn primary" href="#services">আমাদের পরিষেবা</a><a class="btn light" href="#account">Customer Login</a></div>
+    <div class="hero-note">সহজ পরিষেবা • পরিষ্কার মূল্য • গ্রাহক সহায়তা</div>
+  </div>
+  <div class="hero-art" aria-hidden="true"><div class="art-card card-back"></div><div class="art-card card-front"><div class="card-chip"></div><div class="card-line"></div><div class="card-line short"></div><div class="card-brand">SAHANARA</div><div class="card-foot">ONLINE SERVICE</div></div><div class="floating-badge">Digital<br>Services</div></div>
+</section>
+<section class="trust-strip"><div><strong>Online Works</strong><span>ফর্ম ও ডিজিটাল পরিষেবা</span></div><div><strong>PVC Printing</strong><span>বিভিন্ন PVC কার্ড প্রিন্ট</span></div><div><strong>Recharge</strong><span>Mobile & DTH Recharge</span></div></section>
+<section class="section" id="services"><div class="section-heading"><span class="eyebrow">WHAT WE OFFER</span><h2>আমাদের পরিষেবা</h2><p>পরিষেবার মূল্য ও প্রয়োজনীয় কাগজপত্র আগে যোগাযোগ করে জেনে নিন।</p></div><div class="service-grid" id="serviceGrid"></div></section>
+<section class="rate-section" id="rates"><div class="section rate-inner"><div class="section-heading left"><span class="eyebrow">TRANSPARENT PRICING</span><h2>Service Rate List</h2><p>কাজ শুরু করার আগে চূড়ান্ত মূল্য নিশ্চিত করুন।</p></div><div class="rate-card"><div class="rate-row"><span>Online Form Fill-up</span><strong>যোগাযোগ করুন</strong></div><div class="rate-row"><span>PVC Card Printing</span><strong>যোগাযোগ করুন</strong></div><div class="rate-row"><span>Mobile / DTH Recharge</span><strong>প্ল্যান অনুযায়ী</strong></div><div class="rate-row"><span>Custom Banner / Design</span><strong>যোগাযোগ করুন</strong></div><p class="rate-help">নিজস্ব মূল্য তালিকা Admin Panel যুক্ত হওয়ার পর সেট করা যাবে।</p></div></div></section>
 
-  <main>
-    <section class="hero" id="home">
-      <div class="hero-content">
-        <span class="eyebrow">YOUR TRUSTED DIGITAL SERVICE POINT</span>
-        <h1>সব ধরনের Online Service<br><em>এক জায়গায়</em></h1>
-        <p>অনলাইন ফর্ম, রিচার্জ, PVC Card Printing এবং বিভিন্ন ডিজিটাল পরিষেবার জন্য যোগাযোগ করুন।</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="#services">আমাদের পরিষেবা</a>
-          <a class="btn light" href="#contact">যোগাযোগ করুন</a>
-        </div>
-        <div class="hero-note">সহজ পরিষেবা • পরিষ্কার মূল্য • গ্রাহক সহায়তা</div>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="art-card card-back"></div>
-        <div class="art-card card-front">
-          <div class="card-chip"></div><div class="card-line"></div>
-          <div class="card-line short"></div><div class="card-brand">SAHANARA</div>
-          <div class="card-foot">ONLINE SERVICE</div>
-        </div>
-        <div class="floating-badge">Digital<br>Services</div>
-      </div>
-    </section>
+<section class="section account-section" id="account">
+  <div class="section-heading"><span class="eyebrow">CUSTOMER AREA</span><h2>Customer Login / Registration</h2><p>অ্যাকাউন্ট তৈরি বা Login করার প্রাথমিক ব্যবস্থা। বাস্তব Authentication চালু করতে Supabase সেটআপ প্রয়োজন।</p></div>
+  <div class="auth-card">
+    <div class="auth-tabs"><button class="auth-tab active" id="loginTab" type="button">Login</button><button class="auth-tab" id="signupTab" type="button">নতুন অ্যাকাউন্ট</button></div>
+    <form id="authForm">
+      <label id="nameLabel" class="hidden" for="fullName">আপনার নাম</label><input id="fullName" class="hidden" type="text" autocomplete="name" placeholder="আপনার পুরো নাম">
+      <label for="email">ইমেইল</label><input id="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+      <label for="password">পাসওয়ার্ড</label><input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="কমপক্ষে ৮ অক্ষর" required>
+      <button class="btn primary submit-btn" id="authSubmit" type="submit">Login</button>
+      <p id="authMessage" class="auth-message" role="status"></p>
+    </form>
+    <div class="setup-note"><strong>সেটআপ প্রয়োজন:</strong> Supabase Project URL ও Publishable/anon key বসানো না হওয়া পর্যন্ত Login/Registration কাজ করবে না। এই ওয়েবসাইটে Aadhaar নম্বর, OTP, ব্যাংক PIN বা পরিচয়পত্রের ছবি দেবেন না।</div>
+  </div>
+</section>
 
-    <section class="trust-strip">
-      <div><strong>Online Works</strong><span>ফর্ম ও ডিজিটাল পরিষেবা</span></div>
-      <div><strong>PVC Printing</strong><span>বিভিন্ন PVC কার্ড প্রিন্ট</span></div>
-      <div><strong>Recharge</strong><span>Mobile & DTH Recharge</span></div>
-    </section>
-
-    <section class="section" id="services">
-      <div class="section-heading">
-        <span class="eyebrow">WHAT WE OFFER</span>
-        <h2>আমাদের পরিষেবা</h2>
-        <p>আপনার প্রয়োজনীয় পরিষেবার জন্য আগে যোগাযোগ করে মূল্য ও প্রয়োজনীয় কাগজপত্র জেনে নিন।</p>
-      </div>
-      <div class="service-grid" id="serviceGrid"></div>
-    </section>
-
-    <section class="rate-section" id="rates">
-      <div class="section rate-inner">
-        <div class="section-heading left">
-          <span class="eyebrow">TRANSPARENT PRICING</span>
-          <h2>Service Rate List</h2>
-          <p>পরিষেবার ধরন অনুযায়ী মূল্য পরিবর্তিত হতে পারে। কাজ শুরু করার আগে চূড়ান্ত মূল্য নিশ্চিত করুন।</p>
-        </div>
-        <div class="rate-card">
-          <div class="rate-row"><span>Online Form Fill-up</span><strong>যোগাযোগ করুন</strong></div>
-          <div class="rate-row"><span>PVC Card Printing</span><strong>যোগাযোগ করুন</strong></div>
-          <div class="rate-row"><span>Mobile / DTH Recharge</span><strong>প্ল্যান অনুযায়ী</strong></div>
-          <div class="rate-row"><span>Custom Banner / Design</span><strong>যোগাযোগ করুন</strong></div>
-          <p class="rate-help">নিজস্ব Rate List বসাতে <code>script.js</code> ফাইলের নির্দেশনা দেখুন।</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section about-section" id="about">
-      <div class="about-icon">✦</div>
-      <div>
-        <span class="eyebrow">ABOUT SAHANARA</span>
-        <h2>আপনার স্থানীয় ডিজিটাল পরিষেবা কেন্দ্র</h2>
-        <p>Sahanara Online Service & Telecom-এ অনলাইন কাজ, রিচার্জ এবং PVC Card Printing সংক্রান্ত পরিষেবার জন্য সহায়তা পাওয়া যায়। পরিষেবা ও সরকারি নিয়ম সময়ের সঙ্গে বদলাতে পারে—আবেদন করার আগে তথ্য যাচাই করুন।</p>
-      </div>
-    </section>
-
-    <section class="contact-section" id="contact">
-      <div class="section contact-inner">
-        <div>
-          <span class="eyebrow">GET IN TOUCH</span>
-          <h2>যোগাযোগ করুন</h2>
-          <p>কোন পরিষেবা প্রয়োজন, তা জানিয়ে WhatsApp-এ যোগাযোগ করুন।</p>
-          <div class="contact-detail"><span>ঠিকানা</span><strong>Kalinagar Chowrasta, Jagadishpur, Uluberia, Howrah - 711315</strong></div>
-          <div class="contact-detail"><span>মোবাইল</span><strong>7687050082 · 8335095249</strong></div>
-          <a class="btn whatsapp" id="whatsappLink" href="https://wa.me/917687050082" target="_blank" rel="noopener">WhatsApp-এ যোগাযোগ করুন ↗</a>
-        </div>
-        <div class="privacy-card">
-          <div class="privacy-symbol">盾</div>
-          <h3>আপনার তথ্যের সুরক্ষা জরুরি</h3>
-          <p>এই ওয়েবসাইটে Aadhaar নম্বর, OTP, পাসওয়ার্ড, ব্যাংক PIN বা পরিচয়পত্রের ছবি জমা দেবেন না। প্রয়োজন হলে সরাসরি দোকানে নিরাপদভাবে পরামর্শ নিন।</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="footer-brand">SAHANARA <span>ONLINE SERVICE & TELECOM</span></div>
-    <p>© <span id="year"></span> Sahanara Online Service & Telecom. All rights reserved.</p>
-    <a href="#home">Back to top ↑</a>
-  </footer>
-  <script src="script.js"></script>
-</body>
-</html>
+<section class="contact-section" id="contact"><div class="section contact-inner"><div><span class="eyebrow">GET IN TOUCH</span><h2>যোগাযোগ করুন</h2><p>কোন পরিষেবা প্রয়োজন, তা জানিয়ে WhatsApp-এ যোগাযোগ করুন।</p><div class="contact-detail"><span>ঠিকানা</span><strong>Kalinagar Chowrasta, Jagadishpur, Uluberia, Howrah - 711315</strong></div><div class="contact-detail"><span>মোবাইল</span><strong>7687050082 · 8335095249</strong></div><a class="btn whatsapp" id="whatsappLink" href="https://wa.me/917687050082" target="_blank" rel="noopener">WhatsApp-এ যোগাযোগ করুন ↗</a></div><div class="privacy-card"><div class="privacy-symbol">盾</div><h3>আপনার তথ্যের সুরক্ষা জরুরি</h3><p>কাউকে OTP, পাসওয়ার্ড, ব্যাংক PIN বা Aadhaar তথ্য দেবেন না।</p></div></div></section>
+</main>
+<footer><div class="footer-brand">SAHANARA <span>ONLINE SERVICE & TELECOM</span></div><p>© <span id="year"></span> Sahanara Online Service & Telecom. All rights reserved.</p><a href="#home">Back to top ↑</a></footer>
+<script src="supabase-config.js"></script><script src="script.js"></script><script src="auth.js"></script>
+</body></html>
