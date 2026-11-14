@@ -142,10 +142,13 @@ async function customRequest(){
 
 async function loadOrders(){
  const {data,error}=await db.from("orders").select("*").eq("user_id",currentUser.id).order("id",{ascending:false});
- if(error){document.getElementById("orders").textContent=error.message;return;}
- document.getElementById("orders").innerHTML=data.map(o=>
-  <div class="service">Order #${o.id} — ${safe(o.details||"Service")}<br>₹${o.amount}<br>Status: ${safe(o.status)}</div>
- ).join("")||"No orders yet.";
+ if(error){document.getElementById("orders").innerHTML = data.map(o =>
+  `<div class="service">
+    Order #${o.id} — ${safe(o.details || "Service")}<br>
+    ₹${o.amount}<br>
+    Status: ${safe(o.status)}
+  </div>`
+).join("") || "No orders yet.";
 }
 
 async function addService(){
