@@ -4,28 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sahanara Dashboard</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#172554}
-header{background:#123b78;color:white;padding:18px}
+body{
+ margin:0;
+ background:#f1f5f9;
+ font-family:Arial,sans-serif;
+ color:#172554;
+}
+header{
+ background:#123b78;
+ color:white;
+ padding:18px;
+}
 header h2{margin:0}
-main{max-width:1000px;margin:auto;padding:18px}
-.card{background:white;padding:18px;margin:14px 0;border-radius:12px;box-shadow:0 2px 8px #0001}
+main{
+ max-width:1000px;
+ margin:auto;
+ padding:18px;
+}
+.card{
+ background:white;
+ padding:18px;
+ margin:14px 0;
+ border-radius:12px;
+ box-shadow:0 2px 8px #0001;
+}
 h3{color:#123b78}
-input,select,textarea,button{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:7px}
-button{background:#123b78;color:white;border:0;font-weight:bold;cursor:pointer}
-.service{border-bottom:1px solid #ddd;padding:12px 0}
-.price{color:#087443;font-weight:bold}
+input,select,textarea,button{
+ width:100%;
+ padding:12px;
+ margin:7px 0;
+ border:1px solid #ddd;
+ border-radius:7px;
+}
+button{
+ background:#123b78;
+ color:white;
+ border:0;
+ font-weight:bold;
+ cursor:pointer;
+}
+.service{
+ border-bottom:1px solid #ddd;
+ padding:12px 0;
+}
+.price{
+ color:#087443;
+ font-weight:bold;
+}
 .hidden{display:none}
+.error{color:#b91c1c}
 </style>
 </head>
+
 <body>
+
 <header>
 <h2>Sahanara Online Service & Telecom</h2>
 <p>Customer Dashboard</p>
 </header>
 
 <main>
+
 <div class="card">
 <h3>Welcome to Sahanara</h3>
 <p>Choose your service and place your order.</p>
@@ -52,158 +94,298 @@ button{background:#123b78;color:white;border:0;font-weight:bold;cursor:pointer}
 
 <div class="card hidden" id="admin">
 <h3>Admin Panel</h3>
+
 <h4>Add New Service</h4>
 <input id="newName" placeholder="Service Name">
 <input id="newDescription" placeholder="Description">
 <input id="newPrice" type="number" placeholder="Price">
 <button onclick="addService()">Add Service</button>
+
 <h4>Manage Orders</h4>
 <div id="allOrders"></div>
 </div>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+
 <script>
 let db;
 let currentUser;
 
 async function start(){
- if(!window.SAHANARA_SUPABASE_URL || !window.SAHANARA_SUPABASE_ANON_KEY){
+
+ if(!window.SAHANARA_SUPABASE_URL ||
+    !window.SAHANARA_SUPABASE_ANON_KEY){
   alert("Supabase configuration missing");
   return;
  }
+
  db=window.supabase.createClient(
   window.SAHANARA_SUPABASE_URL,
   window.SAHANARA_SUPABASE_ANON_KEY
  );
- const {data:{session}}=await db.auth.getSession();
+
+ const {data,error}=await db.auth.getSession();
+
+ if(error) throw error;
+
+ const session=data.session;
+
  if(!session){
   location.href="index.html";
   return;
  }
+
  currentUser=session.user;
- document.getElementById("account").textContent=currentUser.email;
- const {data:profile}=await db.from("profiles").select("role").eq("id",currentUser.id).maybeSingle();
+
+ document.getElementById("account").textContent=
+  currentUser.email || "";
+
+ const {data:profile,error:profileError}=await db
+  .from("profiles")
+  .select("role")
+  .eq("id",currentUser.id)
+  .maybeSingle();
+
+ if(profileError) throw profileError;
+
  if(profile?.role==="admin"){
   document.getElementById("admin").classList.remove("hidden");
-  loadAllOrders();
+  await loadAllOrders();
  }
- loadServices();
- loadOrders();
+
+ await loadServices();
+ await loadOrders();
 }
 
 async function loadServices(){
- const {data,error}=await db.from("services").select("*").eq("is_active",true).order("id");
- if(error){document.getElementById("services").textContent=error.message;return;}
- document.getElementById("services").innerHTML="";
+
+ const {data,error}=await db
+  .from("services")
+  .select("*")
+  .eq("is_active",true)
+  .order("id");
+
+ if(error){
+  document.getElementById("services").textContent=error.message;
+  return;
+ }
+
+ const container=document.getElementById("services");
+ container.innerHTML="";
+
+ if(!data || data.length===0){
+  container.textContent="No services available.";
+  return;
+ }
+
  data.forEach(s=>{
-  document.getElementById("services").innerHTML+=`
-  <div class="service">
-  <b>${safe(s.name)}</b><br>
-  ${safe(s.description||"")}<br>
-  <span class="price">₹${s.price}</span>
-  <button onclick="placeOrder(${s.id},'${safe(s.name).replace(/'/g,"\\'")}',${s.price})">Order Now</button>
-  </div>`;
+
+  const item=document.createElement("div");
+  item.className="service";
+
+  const name=document.createElement("b");
+  name.textContent=s.name;
+
+  const description=document.createElement("p");
+  description.textContent=s.description || "";
+
+  const price=document.createElement("div");
+  price.className="price";
+  price.textContent="₹"+s.price;
+
+  const button=document.createElement("button");
+  button.textContent="Order Now";
+
+  button.addEventListener("click",()=>{
+   placeOrder(s.id,s.name,Number(s.price));
+  });
+
+  item.append(name,description,price,button);
+  container.appendChild(item);
  });
 }
 
 async function placeOrder(id,name,price){
+
  const mobile=prompt("Enter your mobile number");
- if(!mobile)return;
+ if(!mobile || !mobile.trim()) return;
+
  const {error}=await db.from("orders").insert({
   user_id:currentUser.id,
   service_id:id,
   customer_name:currentUser.email,
-  mobile:mobile,
+  mobile:mobile.trim(),
   amount:price,
   details:name
  });
- if(error)alert(error.message);
- else{alert("Order submitted!");loadOrders();}
+
+ if(error){
+  alert(error.message);
+ }else{
+  alert("Order submitted!");
+  await loadOrders();
+ }
 }
 
 async function customRequest(){
+
  const name=document.getElementById("customName").value.trim();
  const details=document.getElementById("customDetails").value.trim();
- if(!name){alert("Enter service name");return;}
+
+ if(!name){
+  alert("Enter service name");
+  return;
+ }
+
  const mobile=prompt("Enter your mobile number");
- if(!mobile)return;
+ if(!mobile || !mobile.trim()) return;
+
  const {error}=await db.from("orders").insert({
   user_id:currentUser.id,
   customer_name:currentUser.email,
-  mobile,
+  mobile:mobile.trim(),
   details:"Custom: "+name+" - "+details,
   amount:0
  });
- if(error)alert(error.message);
- else{alert("Request submitted");loadOrders();}
+
+ if(error){
+  alert(error.message);
+ }else{
+  alert("Request submitted");
+  document.getElementById("customName").value="";
+  document.getElementById("customDetails").value="";
+  await loadOrders();
+ }
 }
 
 async function loadOrders(){
-  const {data,error}=await db.from("orders")
-    .select("*")
-    .eq("user_id",currentUser.id)
-    .order("id",{ascending:false});
 
-  if(error){
-    document.getElementById("orders").textContent=error.message;
-    return;
-  }
+ const {data,error}=await db
+  .from("orders")
+  .select("*")
+  .eq("user_id",currentUser.id)
+  .order("id",{ascending:false});
 
-  document.getElementById("orders").innerHTML=data.map(o=>`
-    <div class="service">
-      Order #${o.id} — ${safe(o.details || "Service")}<br>
-      ₹${o.amount}<br>
-      Status: ${safe(o.status)}
-    </div>
-  `).join("") || "No orders yet.";
+ if(error){
+  document.getElementById("orders").textContent=error.message;
+  return;
+ }
+
+ document.getElementById("orders").innerHTML=data.map(o=>`
+  <div class="service">
+   Order #${o.id} — ${safe(o.details || "Service")}<br>
+   ₹${o.amount}<br>
+   Status: ${safe(o.status)}
+  </div>
+ `).join("") || "No orders yet.";
 }
+
+async function addService(){
+
  const name=document.getElementById("newName").value.trim();
  const description=document.getElementById("newDescription").value.trim();
  const price=Number(document.getElementById("newPrice").value);
- if(!name||!Number.isFinite(price)||price<0){alert("Enter valid details");return;}
- const {error}=await db.from("services").insert({name,description,price,is_active:true});
- if(error)alert(error.message);
- else{alert("Service added");loadServices();}
+
+ if(!name || !Number.isFinite(price) || price<0){
+  alert("Enter valid details");
+  return;
+ }
+
+ const {error}=await db.from("services").insert({
+  name:name,
+  description:description,
+  price:price,
+  is_active:true
+ });
+
+ if(error){
+  alert(error.message);
+ }else{
+  alert("Service added");
+  document.getElementById("newName").value="";
+  document.getElementById("newDescription").value="";
+  document.getElementById("newPrice").value="";
+  await loadServices();
+ }
 }
 
 async function loadAllOrders(){
- const {data,error}=await db.from("orders").select("*").order("id",{ascending:false});
- if(error){document.getElementById("allOrders").textContent=error.message;return;}
+
+ const {data,error}=await db
+  .from("orders")
+  .select("*")
+  .order("id",{ascending:false});
+
+ if(error){
+  document.getElementById("allOrders").textContent=error.message;
+  return;
+ }
+
  document.getElementById("allOrders").innerHTML=data.map(o=>`
- <div class="service">
- Order #${o.id} — ${safe(o.details||"Service")}<br>
- ${safe(o.mobile||"")} — ₹${o.amount}<br>
- Status: ${safe(o.status)}
- <select id="status${o.id}">
- <option value="pending">Pending</option>
- <option value="processing">Processing</option>
- <option value="completed">Completed</option>
- <option value="cancelled">Cancelled</option>
- </select>
- <button onclick="updateOrder(${o.id})">Update Status</button>
- </div>`).join("")||"No orders yet.";
+  <div class="service">
+   Order #${o.id} — ${safe(o.details || "Service")}<br>
+   ${safe(o.mobile || "")} — ₹${o.amount}<br>
+   Status: ${safe(o.status)}
+
+   <select id="status${o.id}">
+    <option value="pending" ${o.status==="pending"?"selected":""}>Pending</option>
+    <option value="processing" ${o.status==="processing"?"selected":""}>Processing</option>
+    <option value="completed" ${o.status==="completed"?"selected":""}>Completed</option>
+    <option value="cancelled" ${o.status==="cancelled"?"selected":""}>Cancelled</option>
+   </select>
+
+   <button onclick="updateOrder(${o.id})">
+    Update Status
+   </button>
+  </div>
+ `).join("") || "No orders yet.";
 }
 
 async function updateOrder(id){
+
  const status=document.getElementById("status"+id).value;
- const {error}=await db.from("orders").update({status}).eq("id",id);
- if(error)alert(error.message);
- else{alert("Status updated");loadAllOrders();}
+
+ const {error}=await db
+  .from("orders")
+  .update({status:status})
+  .eq("id",id);
+
+ if(error){
+  alert(error.message);
+ }else{
+  alert("Status updated");
+  await loadAllOrders();
+ }
 }
 
 async function logout(){
+
+ if(!db) return;
+
  await db.auth.signOut();
  location.href="index.html";
 }
 
 function safe(value){
+
  return String(value??"").replace(/[&<>"']/g,c=>({
- "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
  }[c]));
 }
-start();
+
+start().catch(error=>{
+ console.error("Dashboard Error:",error);
+ alert("Dashboard Error: "+error.message);
+});
+
 </script>
+
 </body>
 </html>
