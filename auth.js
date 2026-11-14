@@ -50,9 +50,12 @@
         result=await client.auth.signInWithPassword({email,password:pass});
       }
       if(result.error) throw result.error;
-      message.textContent=mode==="signup"
-        ?"অ্যাকাউন্ট তৈরির অনুরোধ সফল। ইমেইল verification চাইলে inbox দেখুন।"
-        :"Login সফল হয়েছে। Customer Dashboard পরের ধাপে যুক্ত করা হবে।";
+      if(mode==="signup"){
+  message.textContent="অ্যাকাউন্ট তৈরির অনুরোধ সফল। ইমেইল verification চাইলে inbox দেখুন।";
+}else{
+  window.location.href="dashboard.html";
+  return;
+}
     }catch(error){
       message.textContent=error.message || "এই মুহূর্তে কাজটি করা যায়নি।";
     }finally{
