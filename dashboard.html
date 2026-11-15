@@ -210,14 +210,34 @@ async function loadServices(){
 
 async function placeOrder(id,name,price){
 
+ const customerName=prompt("Enter your full name");
+ if(!customerName || !customerName.trim()) return;
+
  const mobile=prompt("Enter your mobile number");
- if(!mobile || !mobile.trim()) return;
+ if(!mobile || !/^[0-9]{10}$/.test(mobile.trim())){
+  alert("Enter a valid 10 digit mobile number");
+  return;
+ }
+
+ const address=prompt("Enter your complete delivery address");
+ if(!address || !address.trim()) return;
+
+ const payment=prompt("Payment method: Type CASH or ONLINE");
+ if(!payment || !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+  alert("Please enter CASH or ONLINE");
+  return;
+ }
+
+ const paymentMethod=payment.trim().toUpperCase();
 
  const {error}=await db.from("orders").insert({
   user_id:currentUser.id,
   service_id:id,
-  customer_name:currentUser.email,
+  customer_name:customerName.trim(),
   mobile:mobile.trim(),
+  delivery_address:address.trim(),
+  payment_method:paymentMethod,
+  payment_status:"pending",
   amount:price,
   details:name
  });
@@ -225,8 +245,11 @@ async function placeOrder(id,name,price){
  if(error){
   alert(error.message);
  }else{
-  alert("Order submitted!");
+  alert("Order submitted successfully!");
   await loadOrders();
+  if(document.getElementById("admin").classList.contains("hidden")===false){
+   await loadAllOrders();
+  }
  }
 }
 
