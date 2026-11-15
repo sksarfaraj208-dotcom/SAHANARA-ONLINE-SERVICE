@@ -161,13 +161,27 @@ async function loadServices(){
   return;
  }
 
- data.forEach(s=>{
+data.forEach(s=>{
 
   const item=document.createElement("div");
-  item.className="service";
+  item.className="service card-sample";
 
   const name=document.createElement("b");
   name.textContent=s.name;
+
+  const sample=document.createElement("div");
+  sample.className="sample-design";
+
+  const sampleTitle=document.createElement("span");
+  sampleTitle.textContent="SAHANARA";
+
+  const sampleName=document.createElement("strong");
+  sampleName.textContent=s.name;
+
+  const sampleInfo=document.createElement("small");
+  sampleInfo.textContent="PVC CARD SAMPLE DESIGN";
+
+  sample.append(sampleTitle,sampleName,sampleInfo);
 
   const description=document.createElement("p");
   description.textContent=s.description || "";
@@ -176,6 +190,12 @@ async function loadServices(){
   price.className="price";
   price.textContent="₹"+s.price;
 
+  const choice=document.createElement("select");
+  choice.innerHTML=`
+   <option value="Standard Design">Standard Design</option>
+   <option value="Custom Design">Custom Design</option>
+  `;
+
   const button=document.createElement("button");
   button.textContent="Order Now";
 
@@ -183,9 +203,10 @@ async function loadServices(){
    placeOrder(s.id,s.name,Number(s.price));
   });
 
-  item.append(name,description,price,button);
-  container.appendChild(item);
+  item.append(name,sample,description,price,choice,button);
+ 
  });
+
 }
 
 async function placeOrder(id,name,price){
