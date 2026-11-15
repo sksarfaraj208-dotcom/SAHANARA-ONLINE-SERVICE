@@ -6,6 +6,75 @@
 <title>Sahanara Dashboard</title>
 
 <style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:#f1f5f9;
+ font-family:Arial,sans-serif;
+ color:#172554;
+}
+
+header{
+ background:#123b78;
+ color:white;
+ padding:18px;
+}
+
+header h2{margin:0}
+
+main{
+ max-width:1000px;
+ margin:auto;
+ padding:18px;
+}
+
+.card{
+ background:white;
+ padding:18px;
+ margin:14px 0;
+ border-radius:12px;
+ box-shadow:0 2px 8px #0001;
+}
+
+h3{color:#123b78}
+
+input,select,textarea,button{
+ width:100%;
+ padding:12px;
+ margin:7px 0;
+ border:1px solid #ddd;
+ border-radius:7px;
+ font-size:15px;
+}
+
+textarea{min-height:90px}
+
+button{
+ background:#123b78;
+ color:white;
+ border:0;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+button:disabled{opacity:.6}
+
+.service{
+ border-bottom:1px solid #ddd;
+ padding:12px 0;
+}
+
+.price{
+ color:#087443;
+ font-weight:bold;
+ font-size:18px;
+}
+
+.hidden{display:none}
+
+.error{color:#b91c1c}
+
 .card-sample{
  background:#fff;
  border:2px solid #dbeafe;
@@ -14,6 +83,7 @@
  margin:12px 0;
  text-align:center;
 }
+
 .sample-design{
  width:100%;
  max-width:280px;
@@ -29,13 +99,30 @@
  color:#123b78;
  font-weight:bold;
 }
+
 .sample-design small{
  font-weight:normal;
  margin-top:8px;
 }
+
 .card-sample button{
  background:#087443;
 }
+
+.order-box{
+ background:#f8fafc;
+ border:1px solid #dbeafe;
+ border-radius:10px;
+ padding:12px;
+ margin:12px 0;
+ overflow-wrap:anywhere;
+}
+
+.label{
+ font-weight:bold;
+ color:#123b78;
+}
+
 </style>
 </head>
 
@@ -73,16 +160,18 @@
 </div>
 
 <div class="card hidden" id="admin">
+
 <h3>Admin Panel</h3>
 
 <h4>Add New Service</h4>
 <input id="newName" placeholder="Service Name">
 <input id="newDescription" placeholder="Description">
-<input id="newPrice" type="number" placeholder="Price">
+<input id="newPrice" type="number" min="0" placeholder="Price">
 <button onclick="addService()">Add Service</button>
 
 <h4>Manage Orders</h4>
 <div id="allOrders"></div>
+
 </div>
 
 </main>
@@ -91,6 +180,7 @@
 <script src="supabase-config.js"></script>
 
 <script>
+
 let db;
 let currentUser;
 
@@ -133,14 +223,24 @@ async function start(){
 
  if(profile?.role==="admin"){
   document.getElementById("admin").classList.remove("hidden");
-  await loadAllOrders();
  }
 
  await loadServices();
  await loadOrders();
+
+ if(profile?.role==="admin"){
+  await loadAllOrders();
+ }
+
 }
 
+
+// LOAD SERVICES
+
 async function loadServices(){
+
+ const container=document.getElementById("services");
+ container.textContent="Loading services...";
 
  const {data,error}=await db
   .from("services")
@@ -149,11 +249,10 @@ async function loadServices(){
   .order("id");
 
  if(error){
-  document.getElementById("services").textContent=error.message;
+  container.textContent=error.message;
   return;
  }
 
- const container=document.getElementById("services");
  container.innerHTML="";
 
  if(!data || data.length===0){
@@ -161,7 +260,7 @@ async function loadServices(){
   return;
  }
 
-data.forEach(s=>{
+ data.forEach(s=>{
 
   const item=document.createElement("div");
   item.className="service card-sample";
@@ -191,39 +290,66 @@ data.forEach(s=>{
   price.textContent="₹"+s.price;
 
   const choice=document.createElement("select");
-  choice.innerHTML=`
-   <option value="Standard Design">Standard Design</option>
-   <option value="Custom Design">Custom Design</option>
-  `;
+
+  const standard=document.createElement("option");
+  standard.value="Standard Design";
+  standard.textContent="Standard Design";
+
+  const custom=document.createElement("option");
+  custom.value="Custom Design";
+  custom.textContent="Custom Design";
+
+  choice.append(standard,custom);
 
   const button=document.createElement("button");
   button.textContent="Order Now";
 
   button.addEventListener("click",()=>{
-   placeOrder(s.id,s.name,Number(s.price));
+   placeOrder(
+    s.id,
+    s.name,
+    Number(s.price),
+    choice.value
+   );
   });
 
-  item.append(name,sample,description,price,choice,button);
- 
+  item.append(
+   name,
+   sample,
+   description,
+   price,
+   choice,
+   button
+  );
+
+  // IMPORTANT: Add card to website
+  container.appendChild(item);
+
  });
 
 }
 
-async function placeOrder(id,name,price){
+
+// CUSTOMER ORDER
+
+async function placeOrder(id,name,price,cardOption){
 
  const customerName=prompt("Enter your full name");
  if(!customerName || !customerName.trim()) return;
 
- const mobile=prompt("Enter your mobile number");
+ const mobile=prompt("Enter your 10 digit mobile number");
+
  if(!mobile || !/^[0-9]{10}$/.test(mobile.trim())){
   alert("Enter a valid 10 digit mobile number");
   return;
  }
 
  const address=prompt("Enter your complete delivery address");
+
  if(!address || !address.trim()) return;
 
- const payment=prompt("Payment method: Type CASH or ONLINE");
+ const payment=prompt("Enter CASH or ONLINE");
+
  if(!payment || !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
   alert("Please enter CASH or ONLINE");
   return;
@@ -232,6 +358,7 @@ async function placeOrder(id,name,price){
  const paymentMethod=payment.trim().toUpperCase();
 
  const {error}=await db.from("orders").insert({
+
   user_id:currentUser.id,
   service_id:id,
   customer_name:customerName.trim(),
@@ -239,20 +366,30 @@ async function placeOrder(id,name,price){
   delivery_address:address.trim(),
   payment_method:paymentMethod,
   payment_status:"pending",
+  card_option:cardOption,
   amount:price,
   details:name
+
  });
 
  if(error){
   alert(error.message);
  }else{
+
   alert("Order submitted successfully!");
+
   await loadOrders();
-  if(document.getElementById("admin").classList.contains("hidden")===false){
+
+  if(!document.getElementById("admin").classList.contains("hidden")){
    await loadAllOrders();
   }
+
  }
+
 }
+
+
+// CUSTOM REQUEST
 
 async function customRequest(){
 
@@ -264,28 +401,66 @@ async function customRequest(){
   return;
  }
 
- const mobile=prompt("Enter your mobile number");
- if(!mobile || !mobile.trim()) return;
+ const customerName=prompt("Enter your full name");
+ if(!customerName || !customerName.trim()) return;
+
+ const mobile=prompt("Enter your 10 digit mobile number");
+
+ if(!mobile || !/^[0-9]{10}$/.test(mobile.trim())){
+  alert("Enter a valid 10 digit mobile number");
+  return;
+ }
+
+ const address=prompt("Enter your complete delivery address");
+ if(!address || !address.trim()) return;
+
+ const payment=prompt("Enter CASH or ONLINE");
+
+ if(!payment || !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+  alert("Please enter CASH or ONLINE");
+  return;
+ }
 
  const {error}=await db.from("orders").insert({
+
   user_id:currentUser.id,
-  customer_name:currentUser.email,
+  customer_name:customerName.trim(),
   mobile:mobile.trim(),
+  delivery_address:address.trim(),
+  payment_method:payment.trim().toUpperCase(),
+  payment_status:"pending",
+  card_option:"Custom Request",
   details:"Custom: "+name+" - "+details,
   amount:0
+
  });
 
  if(error){
   alert(error.message);
  }else{
-  alert("Request submitted");
+
+  alert("Request submitted successfully!");
+
   document.getElementById("customName").value="";
   document.getElementById("customDetails").value="";
+
   await loadOrders();
+
+  if(!document.getElementById("admin").classList.contains("hidden")){
+   await loadAllOrders();
+  }
+
  }
+
 }
 
+
+// CUSTOMER ORDER HISTORY
+
 async function loadOrders(){
+
+ const container=document.getElementById("orders");
+ container.textContent="Loading orders...";
 
  const {data,error}=await db
   .from("orders")
@@ -294,49 +469,89 @@ async function loadOrders(){
   .order("id",{ascending:false});
 
  if(error){
-  document.getElementById("orders").textContent=error.message;
+  container.textContent=error.message;
   return;
  }
 
- document.getElementById("orders").innerHTML=data.map(o=>`
-  <div class="service">
-   Order #${o.id} — ${safe(o.details || "Service")}<br>
-   ₹${o.amount}<br>
-   Status: ${safe(o.status)}
+ if(!data || data.length===0){
+  container.textContent="No orders yet.";
+  return;
+ }
+
+ container.innerHTML=data.map(o=>`
+
+  <div class="order-box">
+
+   <b>Order #${safe(o.id)}</b><br>
+
+   Service: ${safe(o.details || "Service")}<br>
+
+   Amount: ₹${safe(o.amount)}<br>
+
+   Card Design: ${safe(o.card_option || "Not selected")}<br>
+
+   Payment: ${safe(o.payment_method || "Not selected")}<br>
+
+   Payment Status: ${safe(o.payment_status || "pending")}<br>
+
+   Order Status: ${safe(o.status || "pending")}
+
   </div>
- `).join("") || "No orders yet.";
+
+ `).join("");
+
 }
+
+
+// ADD SERVICE
 
 async function addService(){
 
  const name=document.getElementById("newName").value.trim();
- const description=document.getElementById("newDescription").value.trim();
- const price=Number(document.getElementById("newPrice").value);
 
- if(!name || !Number.isFinite(price) || price<0){
-  alert("Enter valid details");
+ const description=document.getElementById("newDescription").value.trim();
+
+ const priceInput=document.getElementById("newPrice").value;
+
+ const price=Number(priceInput);
+
+ if(!name || priceInput==="" || !Number.isFinite(price) || price<0){
+  alert("Enter valid service details");
   return;
  }
 
  const {error}=await db.from("services").insert({
+
   name:name,
   description:description,
   price:price,
   is_active:true
+
  });
 
  if(error){
   alert(error.message);
  }else{
-  alert("Service added");
+
+  alert("Service added successfully!");
+
   document.getElementById("newName").value="";
   document.getElementById("newDescription").value="";
   document.getElementById("newPrice").value="";
+
   await loadServices();
+
  }
+
 }
 
+
+// ADMIN ORDER LIST
+
 async function loadAllOrders(){
+
+ const container=document.getElementById("allOrders");
+ container.textContent="Loading all orders...";
 
  const {data,error}=await db
   .from("orders")
@@ -344,15 +559,40 @@ async function loadAllOrders(){
   .order("id",{ascending:false});
 
  if(error){
-  document.getElementById("allOrders").textContent=error.message;
+  container.textContent=error.message;
   return;
  }
 
- document.getElementById("allOrders").innerHTML=data.map(o=>`
-  <div class="service">
-   Order #${o.id} — ${safe(o.details || "Service")}<br>
-   ${safe(o.mobile || "")} — ₹${o.amount}<br>
-   Status: ${safe(o.status)}
+ if(!data || data.length===0){
+  container.textContent="No orders yet.";
+  return;
+ }
+
+ container.innerHTML=data.map(o=>`
+
+  <div class="order-box">
+
+   <b>Order #${safe(o.id)}</b><br>
+
+   Customer: ${safe(o.customer_name || "Not provided")}<br>
+
+   Mobile: ${safe(o.mobile || "Not provided")}<br>
+
+   Address: ${safe(o.delivery_address || "Not provided")}<br>
+
+   Service: ${safe(o.details || "Service")}<br>
+
+   Amount: ₹${safe(o.amount)}<br>
+
+   Card Design: ${safe(o.card_option || "Not selected")}<br>
+
+   Payment Method: ${safe(o.payment_method || "Not selected")}<br>
+
+   Payment Status: ${safe(o.payment_status || "pending")}<br>
+
+   Order Status: ${safe(o.status || "pending")}<br>
+
+   <label class="label">Update Order Status</label>
 
    <select id="status${o.id}">
     <option value="pending" ${o.status==="pending"?"selected":""}>Pending</option>
@@ -361,16 +601,26 @@ async function loadAllOrders(){
     <option value="cancelled" ${o.status==="cancelled"?"selected":""}>Cancelled</option>
    </select>
 
-   <button onclick="updateOrder(${o.id})">
+   <button onclick="updateOrder(${Number(o.id)})">
     Update Status
    </button>
+
   </div>
- `).join("") || "No orders yet.";
+
+ `).join("");
+
 }
+
+
+// UPDATE ORDER STATUS
 
 async function updateOrder(id){
 
- const status=document.getElementById("status"+id).value;
+ const select=document.getElementById("status"+id);
+
+ if(!select) return;
+
+ const status=select.value;
 
  const {error}=await db
   .from("orders")
@@ -380,18 +630,33 @@ async function updateOrder(id){
  if(error){
   alert(error.message);
  }else{
-  alert("Status updated");
+  alert("Order status updated!");
   await loadAllOrders();
+  await loadOrders();
  }
+
 }
+
+
+// LOGOUT
 
 async function logout(){
 
  if(!db) return;
 
- await db.auth.signOut();
+ const {error}=await db.auth.signOut();
+
+ if(error){
+  alert(error.message);
+  return;
+ }
+
  location.href="index.html";
+
 }
+
+
+// HTML SAFETY
 
 function safe(value){
 
@@ -402,11 +667,18 @@ function safe(value){
   '"':"&quot;",
   "'":"&#39;"
  }[c]));
+
 }
 
+
+// START DASHBOARD
+
 start().catch(error=>{
+
  console.error("Dashboard Error:",error);
+
  alert("Dashboard Error: "+error.message);
+
 });
 
 </script>
