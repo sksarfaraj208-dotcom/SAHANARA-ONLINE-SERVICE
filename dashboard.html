@@ -7,143 +7,64 @@
 
 <style>
 *{box-sizing:border-box}
-
 body{
- margin:0;
- background:#f1f5f9;
- font-family:Arial,sans-serif;
- color:#172554;
+ margin:0;background:#f1f5f9;
+ font-family:Arial,sans-serif;color:#172554;
 }
-
-header{
- background:#123b78;
- color:white;
- padding:18px;
-}
-
+header{background:#123b78;color:white;padding:18px}
 header h2{margin:0}
-
-main{
- max-width:1000px;
- margin:auto;
- padding:18px;
-}
-
+main{max-width:1000px;margin:auto;padding:18px}
 .card{
- background:white;
- padding:18px;
- margin:14px 0;
- border-radius:12px;
- box-shadow:0 2px 8px #0001;
+ background:white;padding:18px;margin:14px 0;
+ border-radius:12px;box-shadow:0 2px 8px #0001;
 }
-
 h3{color:#123b78}
-
 input,select,textarea,button{
- width:100%;
- padding:12px;
- margin:7px 0;
- border:1px solid #ddd;
- border-radius:7px;
- font-size:15px;
+ width:100%;padding:12px;margin:7px 0;
+ border:1px solid #ddd;border-radius:7px;font-size:15px;
 }
-
 textarea{min-height:90px}
-
 button{
- background:#123b78;
- color:white;
- border:0;
- font-weight:bold;
- cursor:pointer;
+ background:#123b78;color:white;border:0;
+ font-weight:bold;cursor:pointer;
 }
-
 button:disabled{opacity:.6}
-
-.service{
- border-bottom:1px solid #ddd;
- padding:12px 0;
-}
-
-.price{
- color:#087443;
- font-weight:bold;
- font-size:18px;
-}
-
+.service{border-bottom:1px solid #ddd;padding:12px 0}
+.price{color:#087443;font-weight:bold;font-size:18px}
 .hidden{display:none}
-
 .error{color:#b91c1c}
-
 .card-sample{
- background:#fff;
- border:2px solid #dbeafe;
- border-radius:12px;
- padding:14px;
- margin:12px 0;
- text-align:center;
+ background:#fff;border:2px solid #dbeafe;
+ border-radius:12px;padding:14px;margin:12px 0;text-align:center;
 }
-
 .sample-design{
- width:100%;
- max-width:280px;
- height:155px;
- margin:10px auto;
- border-radius:12px;
- background:linear-gradient(135deg,#dbeafe,#fef3c7);
- border:2px solid #2563eb;
- display:flex;
- flex-direction:column;
- align-items:center;
- justify-content:center;
- color:#123b78;
- font-weight:bold;
- gap:8px;
+ width:100%;max-width:280px;height:155px;margin:10px auto;
+ border-radius:12px;background:linear-gradient(135deg,#dbeafe,#fef3c7);
+ border:2px solid #2563eb;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;color:#123b78;
+ font-weight:bold;gap:8px;
 }
-
-.sample-design small{
- font-weight:normal;
-}
-
-.card-sample button{
- background:#087443;
-}
-
+.sample-design small{font-weight:normal}
+.card-sample button{background:#087443}
 .order-box{
- background:#f8fafc;
- border:1px solid #dbeafe;
- border-radius:10px;
- padding:12px;
- margin:12px 0;
+ background:#f8fafc;border:1px solid #dbeafe;
+ border-radius:10px;padding:12px;margin:12px 0;
  overflow-wrap:anywhere;
 }
-
 .label{
- font-weight:bold;
- color:#123b78;
- display:block;
- margin-top:10px;
+ font-weight:bold;color:#123b78;display:block;margin-top:10px;
 }
-
 .upload-label{
- display:block;
- margin-top:12px;
- font-weight:bold;
- color:#123b78;
+ display:block;margin-top:12px;font-weight:bold;color:#123b78;
 }
-
-.file-help{
- color:#64748b;
- font-size:13px;
-}
-
+.file-help{color:#64748b;font-size:13px}
 .file-link{
- display:inline-block;
- margin:8px 0;
- color:#087443;
- font-weight:bold;
+ display:inline-block;margin:8px 5px 8px 0;
+ padding:10px 12px;border-radius:7px;
+ background:#087443;color:white;
+ font-weight:bold;text-decoration:none;
 }
-
+.download-link{background:#123b78}
 </style>
 </head>
 
@@ -194,24 +115,18 @@ Submit Request
 </div>
 
 <div class="card hidden" id="admin">
-
 <h3>Admin Panel</h3>
 
 <h4>Add New Service</h4>
 
 <input id="newName" placeholder="Service Name">
-
 <input id="newDescription" placeholder="Description">
-
-<input id="newPrice" type="number" min="0"
-placeholder="Price">
+<input id="newPrice" type="number" min="0" placeholder="Price">
 
 <button onclick="addService()">Add Service</button>
 
 <h4>Manage Orders</h4>
-
 <div id="allOrders"></div>
-
 </div>
 
 </main>
@@ -374,11 +289,7 @@ async function loadServices(){
   const sampleInfo=document.createElement("small");
   sampleInfo.textContent="PVC CARD SAMPLE DESIGN";
 
-  sample.append(
-   sampleTitle,
-   sampleName,
-   sampleInfo
-  );
+  sample.append(sampleTitle,sampleName,sampleInfo);
 
   const description=document.createElement("p");
   description.textContent=s.description || "";
@@ -405,24 +316,15 @@ async function loadServices(){
   button.addEventListener("click",()=>{
 
    placeOrder(
-    s.id,
-    s.name,
-    Number(s.price),
-    fileInput.files[0],
-    button
+    s.id,s.name,Number(s.price),
+    fileInput.files[0],button
    );
 
   });
 
   item.append(
-   name,
-   sample,
-   description,
-   price,
-   uploadLabel,
-   fileInput,
-   help,
-   button
+   name,sample,description,price,
+   uploadLabel,fileInput,help,button
   );
 
   container.appendChild(item);
@@ -455,7 +357,6 @@ async function placeOrder(id,name,price,file,button){
 
  if(!payment ||
     !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
-
   alert("Please enter CASH or ONLINE");
   return;
  }
@@ -543,7 +444,6 @@ async function customRequest(){
 
  if(!payment ||
     !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
-
   alert("Please enter CASH or ONLINE");
   return;
  }
@@ -661,7 +561,6 @@ async function addService(){
 
  if(!name || priceInput==="" ||
     !Number.isFinite(price) || price<0){
-
   alert("Enter valid service details");
   return;
  }
@@ -694,7 +593,7 @@ async function addService(){
 }
 
 
-// ADMIN ORDER LIST
+// ADMIN ORDER LIST WITH VIEW AND DOWNLOAD
 
 async function loadAllOrders(){
 
@@ -717,7 +616,7 @@ async function loadAllOrders(){
   return;
  }
 
- // CREATE TEMPORARY PRIVATE LINKS FOR ADMIN
+ // CREATE PRIVATE VIEW AND DOWNLOAD LINKS
 
  const fileLinks={};
 
@@ -725,13 +624,23 @@ async function loadAllOrders(){
 
   if(o.file_path){
 
-   const {data:fileData,error:fileError}=await db.storage
+   // VIEW LINK
+   const {data:viewData,error:viewError}=await db.storage
     .from("order-files")
     .createSignedUrl(o.file_path,600);
 
-   if(!fileError && fileData){
-    fileLinks[o.id]=fileData.signedUrl;
-   }
+   // DOWNLOAD LINK
+   const {data:downloadData,error:downloadError}=await db.storage
+    .from("order-files")
+    .createSignedUrl(o.file_path,600,{
+     download:true
+    });
+
+   fileLinks[o.id]={
+    view:!viewError && viewData ? viewData.signedUrl : null,
+    download:!downloadError && downloadData
+     ? downloadData.signedUrl : null
+   };
 
   }
 
@@ -757,18 +666,36 @@ async function loadAllOrders(){
 
    Payment Status: ${safe(o.payment_status || "pending")}<br>
 
-   File:
+   <b>Uploaded File:</b><br>
+
    ${
-    o.file_path && fileLinks[o.id]
-    ? `<a class="file-link"
-         href="${safe(fileLinks[o.id])}"
-         target="_blank"
-         rel="noopener noreferrer">
-         View Uploaded File
-       </a>`
+    o.file_path && fileLinks[o.id]?.view
+    ? `
+      <a class="file-link"
+       href="${safe(fileLinks[o.id].view)}"
+       target="_blank"
+       rel="noopener noreferrer">
+       View Uploaded File
+      </a>
+    `
     : o.file_path
-      ? "File link unavailable"
+      ? "View link unavailable"
       : "No file uploaded"
+   }
+
+   ${
+    o.file_path && fileLinks[o.id]?.download
+    ? `
+      <a class="file-link download-link"
+       href="${safe(fileLinks[o.id].download)}"
+       target="_blank"
+       rel="noopener noreferrer">
+       Download File
+      </a>
+    `
+    : o.file_path
+      ? "Download link unavailable"
+      : ""
    }
 
    <br>
