@@ -7,64 +7,177 @@
 
 <style>
 *{box-sizing:border-box}
+
 body{
- margin:0;background:#f1f5f9;
- font-family:Arial,sans-serif;color:#172554;
+ margin:0;
+ background:#f1f5f9;
+ font-family:Arial,sans-serif;
+ color:#172554;
 }
-header{background:#123b78;color:white;padding:18px}
+
+header{
+ background:#123b78;
+ color:white;
+ padding:18px;
+}
+
 header h2{margin:0}
-main{max-width:1000px;margin:auto;padding:18px}
+
+main{
+ max-width:1000px;
+ margin:auto;
+ padding:18px;
+}
+
 .card{
- background:white;padding:18px;margin:14px 0;
- border-radius:12px;box-shadow:0 2px 8px #0001;
+ background:white;
+ padding:18px;
+ margin:14px 0;
+ border-radius:12px;
+ box-shadow:0 2px 8px #0001;
 }
+
 h3{color:#123b78}
+
 input,select,textarea,button{
- width:100%;padding:12px;margin:7px 0;
- border:1px solid #ddd;border-radius:7px;font-size:15px;
+ width:100%;
+ padding:12px;
+ margin:7px 0;
+ border:1px solid #ddd;
+ border-radius:7px;
+ font-size:15px;
 }
+
 textarea{min-height:90px}
+
 button{
- background:#123b78;color:white;border:0;
- font-weight:bold;cursor:pointer;
+ background:#123b78;
+ color:white;
+ border:0;
+ font-weight:bold;
+ cursor:pointer;
 }
+
 button:disabled{opacity:.6}
-.service{border-bottom:1px solid #ddd;padding:12px 0}
-.price{color:#087443;font-weight:bold;font-size:18px}
+
+.service{
+ border-bottom:1px solid #ddd;
+ padding:12px 0;
+}
+
+.price{
+ color:#087443;
+ font-weight:bold;
+ font-size:18px;
+}
+
 .hidden{display:none}
-.error{color:#b91c1c}
+
 .card-sample{
- background:#fff;border:2px solid #dbeafe;
- border-radius:12px;padding:14px;margin:12px 0;text-align:center;
+ background:#fff;
+ border:2px solid #dbeafe;
+ border-radius:12px;
+ padding:14px;
+ margin:12px 0;
+ text-align:center;
 }
+
 .sample-design{
- width:100%;max-width:280px;height:155px;margin:10px auto;
- border-radius:12px;background:linear-gradient(135deg,#dbeafe,#fef3c7);
- border:2px solid #2563eb;display:flex;flex-direction:column;
- align-items:center;justify-content:center;color:#123b78;
- font-weight:bold;gap:8px;
+ width:100%;
+ max-width:280px;
+ height:155px;
+ margin:10px auto;
+ border-radius:12px;
+ background:linear-gradient(135deg,#dbeafe,#fef3c7);
+ border:2px solid #2563eb;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ color:#123b78;
+ font-weight:bold;
+ gap:8px;
 }
+
 .sample-design small{font-weight:normal}
+
 .card-sample button{background:#087443}
+
 .order-box{
- background:#f8fafc;border:1px solid #dbeafe;
- border-radius:10px;padding:12px;margin:12px 0;
+ background:#f8fafc;
+ border:1px solid #dbeafe;
+ border-radius:10px;
+ padding:14px;
+ margin:12px 0;
  overflow-wrap:anywhere;
 }
+
 .label{
- font-weight:bold;color:#123b78;display:block;margin-top:10px;
+ font-weight:bold;
+ color:#123b78;
+ display:block;
+ margin-top:10px;
 }
+
 .upload-label{
- display:block;margin-top:12px;font-weight:bold;color:#123b78;
+ display:block;
+ margin-top:12px;
+ font-weight:bold;
+ color:#123b78;
 }
-.file-help{color:#64748b;font-size:13px}
+
+.file-help{
+ color:#64748b;
+ font-size:13px;
+}
+
 .file-link{
- display:inline-block;margin:8px 5px 8px 0;
- padding:10px 12px;border-radius:7px;
- background:#087443;color:white;
- font-weight:bold;text-decoration:none;
+ display:inline-block;
+ margin:8px 5px 8px 0;
+ padding:10px 12px;
+ border-radius:7px;
+ background:#087443;
+ color:white;
+ font-weight:bold;
+ text-decoration:none;
 }
+
 .download-link{background:#123b78}
+
+.status-badge{
+ display:inline-block;
+ padding:6px 11px;
+ border-radius:20px;
+ font-weight:bold;
+ font-size:13px;
+}
+
+.status-pending{
+ background:#fef3c7;
+ color:#92400e;
+}
+
+.status-processing{
+ background:#dbeafe;
+ color:#1e40af;
+}
+
+.status-completed{
+ background:#dcfce7;
+ color:#166534;
+}
+
+.status-cancelled{
+ background:#fee2e2;
+ color:#991b1b;
+}
+
+.order-title{
+ color:#123b78;
+ font-size:17px;
+ font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -102,7 +215,9 @@ placeholder="Enter your requirements"></textarea>
 <input id="customFile" type="file"
 accept="image/jpeg,image/png,application/pdf">
 
-<p class="file-help">JPG, PNG or PDF. Maximum 5 MB. One file only.</p>
+<p class="file-help">
+JPG, PNG or PDF. Maximum 5 MB. One file only.
+</p>
 
 <button id="customButton" onclick="customRequest()">
 Submit Request
@@ -110,11 +225,13 @@ Submit Request
 </div>
 
 <div class="card">
-<h3>My Orders</h3>
+<h3>My Orders & Tracking</h3>
+<p>Track your order status below.</p>
 <div id="orders">Loading orders...</div>
 </div>
 
 <div class="card hidden" id="admin">
+
 <h3>Admin Panel</h3>
 
 <h4>Add New Service</h4>
@@ -126,7 +243,9 @@ Submit Request
 <button onclick="addService()">Add Service</button>
 
 <h4>Manage Orders</h4>
+
 <div id="allOrders"></div>
+
 </div>
 
 </main>
@@ -316,8 +435,11 @@ async function loadServices(){
   button.addEventListener("click",()=>{
 
    placeOrder(
-    s.id,s.name,Number(s.price),
-    fileInput.files[0],button
+    s.id,
+    s.name,
+    Number(s.price),
+    fileInput.files[0],
+    button
    );
 
   });
@@ -357,6 +479,7 @@ async function placeOrder(id,name,price,file,button){
 
  if(!payment ||
     !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+
   alert("Please enter CASH or ONLINE");
   return;
  }
@@ -444,6 +567,7 @@ async function customRequest(){
 
  if(!payment ||
     !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+
   alert("Please enter CASH or ONLINE");
   return;
  }
@@ -498,7 +622,7 @@ async function customRequest(){
 }
 
 
-// CUSTOMER ORDER HISTORY
+// CUSTOMER ORDER HISTORY AND TRACKING
 
 async function loadOrders(){
 
@@ -522,27 +646,70 @@ async function loadOrders(){
   return;
  }
 
- container.innerHTML=data.map(o=>`
+ container.innerHTML=data.map(o=>{
 
-  <div class="order-box">
+  const status=(o.status || "pending").toLowerCase();
 
-   <b>Order #${safe(o.id)}</b><br>
+  const statusClass={
+   pending:"status-pending",
+   processing:"status-processing",
+   completed:"status-completed",
+   cancelled:"status-cancelled"
+  }[status] || "status-pending";
 
-   Service: ${safe(o.details || "Service")}<br>
+  const orderDate=o.created_at
+   ? new Date(o.created_at).toLocaleString("en-IN",{
+      dateStyle:"medium",
+      timeStyle:"short"
+     })
+   : "Not available";
 
-   Amount: ₹${safe(o.amount)}<br>
+  return `
 
-   Payment: ${safe(o.payment_method || "Not selected")}<br>
+   <div class="order-box">
 
-   Payment Status: ${safe(o.payment_status || "pending")}<br>
+    <div class="order-title">
+     Order ID: #${safe(o.id)}
+    </div>
 
-   Order Status: ${safe(o.status || "pending")}<br>
+    <br>
 
-   File: ${o.file_path ? "Uploaded" : "No file uploaded"}
+    <b>Order Date:</b>
+    ${safe(orderDate)}
+    <br><br>
 
-  </div>
+    <b>Service:</b>
+    ${safe(o.details || "Service")}
+    <br><br>
 
- `).join("");
+    <b>Amount:</b>
+    ₹${safe(o.amount)}
+    <br><br>
+
+    <b>Payment:</b>
+    ${safe(o.payment_method || "Not selected")}
+    <br><br>
+
+    <b>Payment Status:</b>
+    ${safe(o.payment_status || "pending")}
+    <br><br>
+
+    <b>Order Status:</b>
+
+    <span class="status-badge ${statusClass}">
+     ${safe(status.toUpperCase())}
+    </span>
+
+    <br><br>
+
+    <b>File:</b>
+    ${o.file_path ? "Uploaded" : "No file uploaded"}
+
+   </div>
+
+  `;
+
+ }).join("");
 
 }
 
@@ -561,6 +728,7 @@ async function addService(){
 
  if(!name || priceInput==="" ||
     !Number.isFinite(price) || price<0){
+
   alert("Enter valid service details");
   return;
  }
@@ -616,20 +784,16 @@ async function loadAllOrders(){
   return;
  }
 
- // CREATE PRIVATE VIEW AND DOWNLOAD LINKS
-
  const fileLinks={};
 
  for(const o of data){
 
   if(o.file_path){
 
-   // VIEW LINK
    const {data:viewData,error:viewError}=await db.storage
     .from("order-files")
     .createSignedUrl(o.file_path,600);
 
-   // DOWNLOAD LINK
    const {data:downloadData,error:downloadError}=await db.storage
     .from("order-files")
     .createSignedUrl(o.file_path,600,{
@@ -650,7 +814,7 @@ async function loadAllOrders(){
 
   <div class="order-box">
 
-   <b>Order #${safe(o.id)}</b><br>
+   <b>Order ID: #${safe(o.id)}</b><br><br>
 
    Customer: ${safe(o.customer_name || "Not provided")}<br>
 
@@ -660,24 +824,27 @@ async function loadAllOrders(){
 
    Service: ${safe(o.details || "Service")}<br>
 
+   Order Date:
+   ${safe(o.created_at
+    ? new Date(o.created_at).toLocaleString("en-IN")
+    : "Not available")}<br>
+
    Amount: ₹${safe(o.amount)}<br>
 
    Payment Method: ${safe(o.payment_method || "Not selected")}<br>
 
-   Payment Status: ${safe(o.payment_status || "pending")}<br>
+   Payment Status: ${safe(o.payment_status || "pending")}<br><br>
 
    <b>Uploaded File:</b><br>
 
    ${
     o.file_path && fileLinks[o.id]?.view
-    ? `
-      <a class="file-link"
+    ? `<a class="file-link"
        href="${safe(fileLinks[o.id].view)}"
        target="_blank"
        rel="noopener noreferrer">
        View Uploaded File
-      </a>
-    `
+      </a>`
     : o.file_path
       ? "View link unavailable"
       : "No file uploaded"
@@ -685,22 +852,21 @@ async function loadAllOrders(){
 
    ${
     o.file_path && fileLinks[o.id]?.download
-    ? `
-      <a class="file-link download-link"
+    ? `<a class="file-link download-link"
        href="${safe(fileLinks[o.id].download)}"
        target="_blank"
        rel="noopener noreferrer">
        Download File
-      </a>
-    `
+      </a>`
     : o.file_path
       ? "Download link unavailable"
       : ""
    }
 
-   <br>
+   <br><br>
 
-   Order Status: ${safe(o.status || "pending")}<br>
+   <b>Current Status:</b>
+   ${safe(o.status || "pending")}<br>
 
    <label class="label">Update Order Status</label>
 
