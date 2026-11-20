@@ -98,11 +98,11 @@ button:disabled{opacity:.6}
  justify-content:center;
  color:#123b78;
  font-weight:bold;
+ gap:8px;
 }
 
 .sample-design small{
  font-weight:normal;
- margin-top:8px;
 }
 
 .card-sample button{
@@ -121,6 +121,27 @@ button:disabled{opacity:.6}
 .label{
  font-weight:bold;
  color:#123b78;
+ display:block;
+ margin-top:10px;
+}
+
+.upload-label{
+ display:block;
+ margin-top:12px;
+ font-weight:bold;
+ color:#123b78;
+}
+
+.file-help{
+ color:#64748b;
+ font-size:13px;
+}
+
+.file-link{
+ display:inline-block;
+ margin:8px 0;
+ color:#087443;
+ font-weight:bold;
 }
 
 </style>
@@ -149,9 +170,22 @@ button:disabled{opacity:.6}
 
 <div class="card">
 <h3>Custom Service Request</h3>
+
 <input id="customName" placeholder="Service Name">
-<textarea id="customDetails" placeholder="Enter your requirements"></textarea>
-<button onclick="customRequest()">Submit Request</button>
+
+<textarea id="customDetails"
+placeholder="Enter your requirements"></textarea>
+
+<label class="upload-label">Upload Your File</label>
+
+<input id="customFile" type="file"
+accept="image/jpeg,image/png,application/pdf">
+
+<p class="file-help">JPG, PNG or PDF. Maximum 5 MB. One file only.</p>
+
+<button id="customButton" onclick="customRequest()">
+Submit Request
+</button>
 </div>
 
 <div class="card">
@@ -164,12 +198,18 @@ button:disabled{opacity:.6}
 <h3>Admin Panel</h3>
 
 <h4>Add New Service</h4>
+
 <input id="newName" placeholder="Service Name">
+
 <input id="newDescription" placeholder="Description">
-<input id="newPrice" type="number" min="0" placeholder="Price">
+
+<input id="newPrice" type="number" min="0"
+placeholder="Price">
+
 <button onclick="addService()">Add Service</button>
 
 <h4>Manage Orders</h4>
+
 <div id="allOrders"></div>
 
 </div>
@@ -183,11 +223,16 @@ button:disabled{opacity:.6}
 
 let db;
 let currentUser;
+let isAdmin=false;
+
+
+// START DASHBOARD
 
 async function start(){
 
  if(!window.SAHANARA_SUPABASE_URL ||
     !window.SAHANARA_SUPABASE_ANON_KEY){
+
   alert("Supabase configuration missing");
   return;
  }
@@ -221,16 +266,64 @@ async function start(){
 
  if(profileError) throw profileError;
 
- if(profile?.role==="admin"){
-  document.getElementById("admin").classList.remove("hidden");
+ isAdmin=profile?.role==="admin";
+
+ if(isAdmin){
+  document.getElementById("admin")
+   .classList.remove("hidden");
  }
 
  await loadServices();
  await loadOrders();
 
- if(profile?.role==="admin"){
+ if(isAdmin){
   await loadAllOrders();
  }
+
+}
+
+
+// FILE VALIDATION AND UPLOAD
+
+async function uploadOrderFile(file){
+
+ if(!file) return null;
+
+ const allowedTypes=[
+  "image/jpeg",
+  "image/png",
+  "application/pdf"
+ ];
+
+ if(!allowedTypes.includes(file.type)){
+  throw new Error("Only JPG, PNG and PDF files are allowed.");
+ }
+
+ if(file.size>5*1024*1024){
+  throw new Error("File size must be within 5 MB.");
+ }
+
+ const extension={
+  "image/jpeg":"jpg",
+  "image/png":"png",
+  "application/pdf":"pdf"
+ }[file.type];
+
+ const uniqueName=
+  Date.now()+"-"+crypto.randomUUID()+"."+extension;
+
+ const path=currentUser.id+"/"+uniqueName;
+
+ const {data,error}=await db.storage
+  .from("order-files")
+  .upload(path,file,{
+   contentType:file.type,
+   upsert:false
+  });
+
+ if(error) throw error;
+
+ return data.path;
 
 }
 
@@ -240,6 +333,7 @@ async function start(){
 async function loadServices(){
 
  const container=document.getElementById("services");
+
  container.textContent="Loading services...";
 
  const {data,error}=await db
@@ -280,7 +374,11 @@ async function loadServices(){
   const sampleInfo=document.createElement("small");
   sampleInfo.textContent="PVC CARD SAMPLE DESIGN";
 
-  sample.append(sampleTitle,sampleName,sampleInfo);
+  sample.append(
+   sampleTitle,
+   sampleName,
+   sampleInfo
+  );
 
   const description=document.createElement("p");
   description.textContent=s.description || "";
@@ -289,28 +387,31 @@ async function loadServices(){
   price.className="price";
   price.textContent="₹"+s.price;
 
-  const choice=document.createElement("select");
+  const uploadLabel=document.createElement("label");
+  uploadLabel.className="upload-label";
+  uploadLabel.textContent="Upload Your File";
 
-  const standard=document.createElement("option");
-  standard.value="Standard Design";
-  standard.textContent="Standard Design";
+  const fileInput=document.createElement("input");
+  fileInput.type="file";
+  fileInput.accept="image/jpeg,image/png,application/pdf";
 
-  const custom=document.createElement("option");
-  custom.value="Custom Design";
-  custom.textContent="Custom Design";
-
-  choice.append(standard,custom);
+  const help=document.createElement("p");
+  help.className="file-help";
+  help.textContent="JPG, PNG or PDF. Maximum 5 MB. One file only.";
 
   const button=document.createElement("button");
   button.textContent="Order Now";
 
   button.addEventListener("click",()=>{
+
    placeOrder(
     s.id,
     s.name,
     Number(s.price),
-    choice.value
+    fileInput.files[0],
+    button
    );
+
   });
 
   item.append(
@@ -318,11 +419,12 @@ async function loadServices(){
    sample,
    description,
    price,
-   choice,
+   uploadLabel,
+   fileInput,
+   help,
    button
   );
 
-  // IMPORTANT: Add card to website
   container.appendChild(item);
 
  });
@@ -332,9 +434,10 @@ async function loadServices(){
 
 // CUSTOMER ORDER
 
-async function placeOrder(id,name,price,cardOption){
+async function placeOrder(id,name,price,file,button){
 
  const customerName=prompt("Enter your full name");
+
  if(!customerName || !customerName.trim()) return;
 
  const mobile=prompt("Enter your 10 digit mobile number");
@@ -350,39 +453,54 @@ async function placeOrder(id,name,price,cardOption){
 
  const payment=prompt("Enter CASH or ONLINE");
 
- if(!payment || !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+ if(!payment ||
+    !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+
   alert("Please enter CASH or ONLINE");
   return;
  }
 
- const paymentMethod=payment.trim().toUpperCase();
+ try{
 
- const {error}=await db.from("orders").insert({
+  button.disabled=true;
+  button.textContent="Submitting...";
 
-  user_id:currentUser.id,
-  service_id:id,
-  customer_name:customerName.trim(),
-  mobile:mobile.trim(),
-  delivery_address:address.trim(),
-  payment_method:paymentMethod,
-  payment_status:"pending",
-  card_option:cardOption,
-  amount:price,
-  details:name
+  const filePath=await uploadOrderFile(file);
 
- });
+  const {error}=await db.from("orders").insert({
 
- if(error){
-  alert(error.message);
- }else{
+   user_id:currentUser.id,
+   service_id:id,
+   customer_name:customerName.trim(),
+   mobile:mobile.trim(),
+   delivery_address:address.trim(),
+   payment_method:payment.trim().toUpperCase(),
+   payment_status:"pending",
+   card_option:"File Upload",
+   file_path:filePath,
+   amount:price,
+   details:name
+
+  });
+
+  if(error) throw error;
 
   alert("Order submitted successfully!");
 
   await loadOrders();
 
-  if(!document.getElementById("admin").classList.contains("hidden")){
+  if(isAdmin){
    await loadAllOrders();
   }
+
+ }catch(error){
+
+  alert("Order Error: "+error.message);
+
+ }finally{
+
+  button.disabled=false;
+  button.textContent="Order Now";
 
  }
 
@@ -393,8 +511,13 @@ async function placeOrder(id,name,price,cardOption){
 
 async function customRequest(){
 
+ const button=document.getElementById("customButton");
+
  const name=document.getElementById("customName").value.trim();
+
  const details=document.getElementById("customDetails").value.trim();
+
+ const file=document.getElementById("customFile").files[0];
 
  if(!name){
   alert("Enter service name");
@@ -402,6 +525,7 @@ async function customRequest(){
  }
 
  const customerName=prompt("Enter your full name");
+
  if(!customerName || !customerName.trim()) return;
 
  const mobile=prompt("Enter your 10 digit mobile number");
@@ -412,43 +536,62 @@ async function customRequest(){
  }
 
  const address=prompt("Enter your complete delivery address");
+
  if(!address || !address.trim()) return;
 
  const payment=prompt("Enter CASH or ONLINE");
 
- if(!payment || !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+ if(!payment ||
+    !["CASH","ONLINE"].includes(payment.trim().toUpperCase())){
+
   alert("Please enter CASH or ONLINE");
   return;
  }
 
- const {error}=await db.from("orders").insert({
+ try{
 
-  user_id:currentUser.id,
-  customer_name:customerName.trim(),
-  mobile:mobile.trim(),
-  delivery_address:address.trim(),
-  payment_method:payment.trim().toUpperCase(),
-  payment_status:"pending",
-  card_option:"Custom Request",
-  details:"Custom: "+name+" - "+details,
-  amount:0
+  button.disabled=true;
+  button.textContent="Submitting...";
 
- });
+  const filePath=await uploadOrderFile(file);
 
- if(error){
-  alert(error.message);
- }else{
+  const {error}=await db.from("orders").insert({
+
+   user_id:currentUser.id,
+   customer_name:customerName.trim(),
+   mobile:mobile.trim(),
+   delivery_address:address.trim(),
+   payment_method:payment.trim().toUpperCase(),
+   payment_status:"pending",
+   card_option:"Custom Request",
+   file_path:filePath,
+   details:"Custom: "+name+" - "+details,
+   amount:0
+
+  });
+
+  if(error) throw error;
 
   alert("Request submitted successfully!");
 
   document.getElementById("customName").value="";
   document.getElementById("customDetails").value="";
+  document.getElementById("customFile").value="";
 
   await loadOrders();
 
-  if(!document.getElementById("admin").classList.contains("hidden")){
+  if(isAdmin){
    await loadAllOrders();
   }
+
+ }catch(error){
+
+  alert("Request Error: "+error.message);
+
+ }finally{
+
+  button.disabled=false;
+  button.textContent="Submit Request";
 
  }
 
@@ -460,6 +603,7 @@ async function customRequest(){
 async function loadOrders(){
 
  const container=document.getElementById("orders");
+
  container.textContent="Loading orders...";
 
  const {data,error}=await db
@@ -488,13 +632,13 @@ async function loadOrders(){
 
    Amount: ₹${safe(o.amount)}<br>
 
-   Card Design: ${safe(o.card_option || "Not selected")}<br>
-
    Payment: ${safe(o.payment_method || "Not selected")}<br>
 
    Payment Status: ${safe(o.payment_status || "pending")}<br>
 
-   Order Status: ${safe(o.status || "pending")}
+   Order Status: ${safe(o.status || "pending")}<br>
+
+   File: ${o.file_path ? "Uploaded" : "No file uploaded"}
 
   </div>
 
@@ -515,7 +659,9 @@ async function addService(){
 
  const price=Number(priceInput);
 
- if(!name || priceInput==="" || !Number.isFinite(price) || price<0){
+ if(!name || priceInput==="" ||
+    !Number.isFinite(price) || price<0){
+
   alert("Enter valid service details");
   return;
  }
@@ -530,7 +676,9 @@ async function addService(){
  });
 
  if(error){
+
   alert(error.message);
+
  }else{
 
   alert("Service added successfully!");
@@ -551,6 +699,7 @@ async function addService(){
 async function loadAllOrders(){
 
  const container=document.getElementById("allOrders");
+
  container.textContent="Loading all orders...";
 
  const {data,error}=await db
@@ -566,6 +715,26 @@ async function loadAllOrders(){
  if(!data || data.length===0){
   container.textContent="No orders yet.";
   return;
+ }
+
+ // CREATE TEMPORARY PRIVATE LINKS FOR ADMIN
+
+ const fileLinks={};
+
+ for(const o of data){
+
+  if(o.file_path){
+
+   const {data:fileData,error:fileError}=await db.storage
+    .from("order-files")
+    .createSignedUrl(o.file_path,600);
+
+   if(!fileError && fileData){
+    fileLinks[o.id]=fileData.signedUrl;
+   }
+
+  }
+
  }
 
  container.innerHTML=data.map(o=>`
@@ -584,21 +753,52 @@ async function loadAllOrders(){
 
    Amount: ₹${safe(o.amount)}<br>
 
-   Card Design: ${safe(o.card_option || "Not selected")}<br>
-
    Payment Method: ${safe(o.payment_method || "Not selected")}<br>
 
    Payment Status: ${safe(o.payment_status || "pending")}<br>
+
+   File:
+   ${
+    o.file_path && fileLinks[o.id]
+    ? `<a class="file-link"
+         href="${safe(fileLinks[o.id])}"
+         target="_blank"
+         rel="noopener noreferrer">
+         View Uploaded File
+       </a>`
+    : o.file_path
+      ? "File link unavailable"
+      : "No file uploaded"
+   }
+
+   <br>
 
    Order Status: ${safe(o.status || "pending")}<br>
 
    <label class="label">Update Order Status</label>
 
-   <select id="status${o.id}">
-    <option value="pending" ${o.status==="pending"?"selected":""}>Pending</option>
-    <option value="processing" ${o.status==="processing"?"selected":""}>Processing</option>
-    <option value="completed" ${o.status==="completed"?"selected":""}>Completed</option>
-    <option value="cancelled" ${o.status==="cancelled"?"selected":""}>Cancelled</option>
+   <select id="status${Number(o.id)}">
+
+    <option value="pending"
+    ${o.status==="pending"?"selected":""}>
+    Pending
+    </option>
+
+    <option value="processing"
+    ${o.status==="processing"?"selected":""}>
+    Processing
+    </option>
+
+    <option value="completed"
+    ${o.status==="completed"?"selected":""}>
+    Completed
+    </option>
+
+    <option value="cancelled"
+    ${o.status==="cancelled"?"selected":""}>
+    Cancelled
+    </option>
+
    </select>
 
    <button onclick="updateOrder(${Number(o.id)})">
@@ -628,11 +828,16 @@ async function updateOrder(id){
   .eq("id",id);
 
  if(error){
+
   alert(error.message);
+
  }else{
+
   alert("Order status updated!");
+
   await loadAllOrders();
   await loadOrders();
+
  }
 
 }
@@ -661,11 +866,13 @@ async function logout(){
 function safe(value){
 
  return String(value??"").replace(/[&<>"']/g,c=>({
+
   "&":"&amp;",
   "<":"&lt;",
   ">":"&gt;",
   '"':"&quot;",
   "'":"&#39;"
+
  }[c]));
 
 }
